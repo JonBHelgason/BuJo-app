@@ -4,8 +4,17 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
-export default defineConfig(() => {
+export default defineConfig(({ command, mode }) => {
+  // For GitHub Pages (https://<username>.github.io/bujo-app/), base is '/bujo-app/'.
+  // In local development server ('serve'), default to root '/'.
+  const base =
+    process.env.VITE_BASE ||
+    (command === 'build' || process.env.GITHUB_ACTIONS === 'true' || process.env.GITHUB_PAGES === 'true'
+      ? '/bujo-app/'
+      : '/');
+
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
@@ -13,7 +22,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          id: '/',
+          id: base,
           name: 'BuJón – Quiet Bullet Journal',
           short_name: 'BuJón',
           description: 'A capture-first, distraction-free digital Bullet Journal with offline persistence.',
@@ -21,23 +30,23 @@ export default defineConfig(() => {
           background_color: '#fafaf9',
           display: 'standalone',
           orientation: 'portrait-primary',
-          start_url: '/',
-          scope: '/',
+          start_url: base,
+          scope: base,
           icons: [
             {
-              src: '/icon-192.png',
+              src: `${base}icon-192.png`,
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/icon-512.png',
+              src: `${base}icon-512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/icon-maskable-512.png',
+              src: `${base}icon-maskable-512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',

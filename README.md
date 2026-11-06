@@ -127,6 +127,25 @@ npm run preview
 
 ---
 
+## Hosting on GitHub Pages (`jonbhelgason/bujo-app`)
+
+This repository is pre-configured with the base path `/bujo-app/` and an automated GitHub Actions deployment workflow:
+
+1. **Push your code to GitHub**:
+   ```bash
+   git add .
+   git commit -m "Configure GitHub Pages PWA deployment"
+   git push origin main
+   ```
+2. **Enable GitHub Pages in your repository settings**:
+   - Go to **Settings** $\to$ **Pages** in your GitHub repository (`jonbhelgason/bujo-app`).
+   - Under **Build and deployment** $\to$ **Source**, select **GitHub Actions**.
+3. **Automated Deployment**:
+   - The workflow (`.github/workflows/deploy.yml`) will automatically build the static PWA and deploy it to `https://jonbhelgason.github.io/bujo-app/`.
+   - The workflow includes SPA routing fallback (`404.html`) and manifest scope configuration for seamless PWA installation and page refreshes.
+
+---
+
 ## Installing on Mobile Devices (PWA)
 
 ### iOS (iPhone / iPad)
