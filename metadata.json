@@ -1,0 +1,6 @@
+{
+  "name": "BuJón – Quiet Bullet Journal",
+  "description": "Capture-first, distraction-free digital Bullet Journal with deliberate task migration, daily logs, future logs, collections, and offline IndexedDB persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
