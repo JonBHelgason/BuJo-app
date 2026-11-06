@@ -146,18 +146,34 @@ This repository is pre-configured with the base path `/bujo-app/` and an automat
 
 ---
 
-## Installing on Mobile Devices (PWA)
+## Installing on Mobile Devices
 
-### iOS (iPhone / iPad)
-1. Open the app in **Safari**.
+### 📱 Android Native App (.APK via GitHub Actions)
+BuJón includes an automated workflow (`.github/workflows/build-apk.yml`) that automatically compiles a standalone native Android debug APK on every commit:
+
+1. Push your repository commits to GitHub (`main`).
+2. Open your repository on GitHub: **`https://github.com/jonbhelgason/bujo-app`**.
+3. Tap the **Actions** tab $\to$ click the latest **Build Android APK** workflow run.
+4. Scroll down to the **Artifacts** section at the bottom of the summary page.
+5. Tap **`bujo-app-debug-apk`** to download the zip containing `app-debug.apk` directly to your phone.
+6. Open the downloaded file and tap **Install** *(if prompted, toggle "Allow installation from unknown sources" or your browser's installer permission once)*.
+7. BuJón will appear in your Android App Drawer as a native app with offline storage!
+
+---
+
+### 🌐 Web & PWA Home Screen (iOS / Android Browser)
+
+#### iOS (iPhone / iPad Safari)
+1. Open the app link in **Safari**.
 2. Tap the **Share** button in the Safari toolbar.
 3. Scroll down and tap **Add to Home Screen**.
 4. Tap **Add**. BuJón will launch full-screen like a native app.
 
-### Android / Chrome / Edge
-1. Open the app in Chrome or Edge.
-2. Tap the **Install** button in the top navigation bar (or select *Install app* from the browser menu).
-3. Confirm installation to add BuJón to your home screen or app drawer.
+#### Android (Chrome / Edge)
+1. Open the app link in Chrome.
+2. Tap the three dots (⋮) in the top-right corner.
+3. Tap **Add to Home screen** (or **Install app**).
+4. Tap **Install** to add the standalone web shortcut to your launcher.
 
 ---
 

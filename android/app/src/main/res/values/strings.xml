@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BuJón</string>
+    <string name="title_activity_main">BuJón</string>
+    <string name="package_name">com.bujo.app</string>
+    <string name="custom_url_scheme">com.bujo.app</string>
+</resources>

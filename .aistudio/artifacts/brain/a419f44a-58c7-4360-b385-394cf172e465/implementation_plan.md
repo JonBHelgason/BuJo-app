@@ -1,103 +1,110 @@
-# BuJón Mobile-Ready & PWA Implementation Plan
+# Method 2 Implementation Plan: Automated Native Android APK Builder
 
-Elevate the BuJón Bullet Journal web app into a high-grade mobile touch application and installable Progressive Web App (PWA) with thumb-zone navigation, horizontal day swiping, and offline home screen support.
+Build a standalone, native Android application (`.apk`) using Capacitor and an automated GitHub Actions workflow, allowing direct installation onto any Android phone without local developer tooling.
 
----
-
-### User Review & Critical Decisions
+## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following mobile-readiness choices have been aligned with your preferences:
-> - **PWA Installation & Offline Support**: Configured with Web App Manifest, offline service worker caching, and an in-app installation prompt with iOS Safari guidance.
-> - **Horizontal Day Swiping**: Touch gesture detection on the Daily Log canvas enabling natural left/right swipes to move between yesterday, today, and tomorrow.
-> - **Mobile Navigation (Thumb Ergonomics)**: An ergonomic fixed bottom tab bar on mobile viewports (< 768px) with 44px+ hitboxes, seamlessly transitioning to the desktop top-bar on wider screens.
+> You selected **Method 2 (Automated Native Android APK)**. 
+> Every git push will trigger a GitHub runner that builds a real `app-debug.apk` file and attaches it to your GitHub Actions artifacts and Releases, ready to download and install on your phone.
+
+- **App Package Name**: `com.bujo.app`
+- **App Display Name**: `BuJón`
+- **Output Artifact**: `bujo-app-debug.apk` (Downloadable directly from GitHub on your phone)
+- **Local Tooling Required**: Zero. GitHub's cloud runners will execute Gradle and the Android SDK.
 
 ---
 
-### 1. Overview & Core Concept
-
-- **What It Does**: Transforms the digital bullet journal into an app that feels like a native iOS/Android experience: installable to the phone's home screen without browser chrome, navigable with single-handed thumb taps, and responsive to horizontal swipe gestures to flip between journal days.
-- **Target Audience**: Mobile-first Bullet Journal practitioners who need sub-3-second capture on their phones while on the go, without distractions, accounts, or cloud dependency.
-- **Key Value**: The tactile, quiet intimacy of paper journaling combined with the instant accessibility of an offline mobile app.
-
----
-
-### 2. User Experience & Visual Design
-
-Following the **Mobile & Touch-First Applications Design Reference** (`10_mobile_touch_apps.md`):
-
-#### A. Mobile Thumb-Zone Navigation (Viewport < 768px)
-- **Fixed Bottom Tab Bar**: Anchored to the bottom (`fixed bottom-0 z-30 pb-safe`) with 5 core tabs: **Today**, **Month**, **Future**, **Collections**, and **Index**.
-- **Touch Target Ergonomics**: Every tab icon and button has a minimum hitbox of **44 × 44px** to eliminate mis-taps.
-- **Responsive Preservation**: On desktop (`md:` and above), the clean Top Bar Contract header remains the primary navigation, hiding the mobile bottom bar.
-- **Capture Bar Placement**: On mobile, the rapid capture bar rests immediately above the bottom tab bar, ensuring the input and bullet symbol remain directly in the natural thumb reach zone (bottom 40% of the screen).
-
-#### B. Natural Horizontal Day Swiping
-- **Touch Gesture Engine**: Smooth touch start/move/end listener with touch distance and velocity detection (`minSwipeDistance = 50px`, horizontal angle constraint to prevent accidental triggers while scrolling vertically).
-- **Tactile Transition**: Swiping left advances to tomorrow; swiping right flips to yesterday.
-- **Visual Feedback**: Micro slide transition effect to communicate directional movement.
-
-#### C. Full PWA Installability
-- **In-App Install Prompt**: A clean install action (`Install App` or `Add to Home Screen`) in the header and testing modal.
-- **iOS Safari Guide Modal**: A dedicated sheet showing iOS users how to tap the Safari Share button and select "Add to Home Screen".
-- **Standalone Mode Awareness**: Automatically suppresses install prompts when running standalone from the home screen.
-- **Offline Reliability Indicator**: Non-intrusive status banner indicating local IndexedDB caching is active during offline usage.
-
----
-
-### 3. Key Product Decisions & Trade-Offs
-
-- **Decision 1: Mobile Bottom Tab Bar vs Top Navigation**
-  - *Chosen Approach*: Adaptive split: Dedicated bottom tab bar on mobile screens (< 768px), top bar on tablets and desktop (≥ 768px).
-  - *Why*: Modern phones (375px–430px) require bottom-weighted touch targets to reduce thumb fatigue.
-  - *Alternatives Considered*: Hamburger drawer (adds unnecessary extra taps) or top horizontal scroll (hard to reach one-handed).
-
-- **Decision 2: Native Touch Swipe vs Third-Party Gesture Library**
-  - *Chosen Approach*: Lightweight native React pointer/touch event handler for horizontal swiping.
-  - *Why*: Zero bundle bloat, zero dependency conflicts, smooth 60fps gesture handling with proper vertical scroll isolation (`Math.abs(deltaX) > Math.abs(deltaY)`).
-
-- **Decision 3: PWA Architecture (`vite-plugin-pwa`)**
-  - *Chosen Approach*: Integrate `vite-plugin-pwa` with `registerType: 'autoUpdate'`, standalone manifest, and runtime font caching.
-  - *Why*: Provides standards-compliant Web App Manifest, auto-updating service worker, and instant offline boot.
-
----
-
-### 4. Technical Architecture & Component Structure
+## 1. Overview & Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 Top App Bar (Desktop & Mobile)             │
-│  [BuJón]                 [Undo] [Theme] [Install] [Test]    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│                      Active View Area                       │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │  DailyLog View (Swipeable Canvas: swipe left/right)   │  │
-│  │  - Day header & stats                                 │  │
-│  │  - Interactive Entry rows (drag, tap, cycle, strike)  │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│         Rapid Capture Bar (Anchored in Thumb Zone)          │
-│  [Log ▾] [•] [Type entry here...]                [Add ↵]   │
-├─────────────────────────────────────────────────────────────┤
-│      Mobile Bottom Tab Bar (Visible on Viewports < 768px)   │
-│   [Today]     [Month]     [Future]   [Collections]  [Index] │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│ 1. Git Push / Manual Trigger                           │
+│    User pushes commits to GitHub (jonbhelgason/bujo-app)│
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. GitHub Actions Cloud Runner (Ubuntu)                │
+│    - Node 22 + Java JDK 17 (Temurin)                   │
+│    - `npm install --legacy-peer-deps`                  │
+│    - `npm run build` (Builds production assets)        │
+│    - `npx cap sync android` (Copies assets to Android) │
+│    - `./gradlew assembleDebug` (Compiles APK)          │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. Downloadable Artifact & GitHub Release              │
+│    - `bujo-app-debug.apk` produced                     │
+│    - Uploaded to GitHub Actions Artifacts              │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ 4. Android Phone Installation                          │
+│    - Open GitHub on phone browser                      │
+│    - Download and tap `bujo-app-debug.apk`             │
+│    - Tap "Install" -> Opens full-screen from App Drawer│
+└────────────────────────────────────────────────────────┘
 ```
 
-#### Key Implementation Steps:
-1. **PWA Tooling & Manifest**:
-   - Install `vite-plugin-pwa` as a dev dependency.
-   - Configure `vite.config.ts` with manifest metadata (`id: '/'`, `display: 'standalone'`, theme colors, icons, offline workbox caching).
-   - Add Apple mobile web app and mobile meta tags in `index.html`.
-   - Create brand PWA SVG and PNG icon representations in `public/`.
-2. **PWA Install Hook & iOS Guide**:
-   - Create `src/hooks/usePWAInstall.ts` handling `beforeinstallprompt`, `appinstalled`, and iOS WebKit detection.
-   - Add install triggers in `TopNav.tsx` and `TestVerificationModal.tsx`.
-3. **Mobile Bottom Tab Bar**:
-   - Create `src/components/MobileBottomNav.tsx` with 44px+ hitboxes, active indicator pills, and safe-area insets.
-4. **Touch Swipe Gesture Integration**:
-   - Implement horizontal swipe detection in `src/views/DailyLog.tsx` with smooth day switching.
-5. **Layout Adjustment**:
-   - Adjust bottom spacing (`pb-28 sm:pb-24`) so entries and the capture input never collide with mobile safe areas or the bottom navigation bar.
+---
+
+## 2. Key Changes & Files to Create
+
+### 1. Capacitor Setup & Configuration
+- **Dependencies**: Install `@capacitor/core`, `@capacitor/cli`, and `@capacitor/android`.
+- **`capacitor.config.ts`**:
+  - `appId`: `'com.bujo.app'`
+  - `appName`: `'BuJón'`
+  - `webDir`: `'dist'`
+  - `server`: `{ androidScheme: 'https' }` (ensures modern IndexedDB/Dexie storage compatibility on Android WebViews).
+
+### 2. Android Native Project Structure (`/android`)
+- Run `npx cap add android` to generate:
+  - `android/app/src/main/AndroidManifest.xml` (app permissions, orientation, and launch config).
+  - `android/app/build.gradle` and root `android/build.gradle`.
+  - Gradle wrapper (`gradlew` and `gradle/wrapper/gradle-wrapper.properties`).
+  - Native Android launcher icon assets generated from the BuJón theme icon.
+
+### 3. Automated GitHub Actions Workflow (`.github/workflows/build-apk.yml`)
+- Create a dedicated workflow that:
+  - Checks out the repository.
+  - Sets up Java 17 (`actions/setup-java@v4` with `distribution: 'temurin'`).
+  - Sets up Node 22 (`actions/setup-node@v4`).
+  - Installs dependencies and runs `npm run build` with `VITE_BASE=/` (for native packaged assets).
+  - Synchronizes web assets with `npx cap sync android`.
+  - Runs `./gradlew assembleDebug` with appropriate execution permissions (`chmod +x gradlew`).
+  - Uploads the resulting `.apk` file (`android/app/build/outputs/apk/debug/app-debug.apk`) as an easily downloadable artifact named `bujo-android-apk`.
+
+### 4. Android Safe-Area & Viewport Tweaks
+- Ensure top and bottom safe-area insets (`env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`) prevent content from overlapping the Android status bar and gesture navigation pill.
+- Ensure the offline IndexedDB database functions flawlessly inside the native Android WebView.
+
+### 5. Documentation (`README.md`)
+- Add a clear "Installing on Android" section with step-by-step instructions:
+  1. Go to the **Actions** tab in `jonbhelgason/bujo-app`.
+  2. Click the latest green workflow run.
+  3. Scroll down to **Artifacts** and download `bujo-android-apk`.
+  4. Open the downloaded `.apk` file and tap **Install**.
+
+---
+
+## 3. Product & Technical Decisions
+
+- **Debug APK vs. Signed Release APK**:
+  - *Chosen Approach*: Build an `assembleDebug` APK.
+  - *Why*: Debug APKs can be sideloaded and installed immediately on any Android phone without needing to create or manage secret cryptographic keystores (`.keystore` files).
+- **Webview Scheme**:
+  - *Chosen Approach*: `androidScheme: 'https'`.
+  - *Why*: Modern Android WebViews require HTTPS origins to allow IndexedDB and modern Web APIs without security sandboxing restrictions.
+
+---
+
+## 4. Verification & Testing Plan
+
+1. Verify local web build compiles cleanly with `npm run build` and `tsc --noEmit`.
+2. Verify Capacitor config parses properly with `npx cap sync android`.
+3. Verify Gradle configuration files are syntactically valid and gradlew script is executable.
+4. Verify GitHub workflow file syntax.
