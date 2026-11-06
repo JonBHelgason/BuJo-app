@@ -126,7 +126,7 @@ export function MonthlyLog({ onStateChange, onStartReview }: MonthlyLogProps) {
       )}
 
       {/* Two Column Layout (Ryder Carroll Classic: Left = Calendar, Right = Monthly Tasks) */}
-      <div className="flex-1 p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-24 dot-grid">
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-36 sm:pb-24 dot-grid">
         {/* Left Column: Date-by-date calendar (Cols 1-5) */}
         <div className="lg:col-span-5 bg-white/70 dark:bg-stone-900/50 p-4 rounded-xl border border-stone-200 dark:border-stone-800 h-fit space-y-2">
           <h3 className="font-serif-title font-semibold text-sm text-stone-900 dark:text-stone-100 border-b border-stone-200 dark:border-stone-800 pb-2">
@@ -203,8 +203,8 @@ export function MonthlyLog({ onStateChange, onStartReview }: MonthlyLogProps) {
         </div>
       </div>
 
-      {/* Sticky Bottom Capture Bar */}
-      <div className="sticky bottom-0 p-3 sm:p-4 bg-gradient-to-t from-stone-50 via-stone-50/95 to-transparent dark:from-stone-950 dark:via-stone-950/95 z-20">
+      {/* Sticky Bottom Capture Bar - Clear mobile bottom navigation bar */}
+      <div className="sticky bottom-16 md:bottom-0 p-3 sm:p-4 bg-gradient-to-t from-stone-50 via-stone-50/95 to-transparent dark:from-stone-950 dark:via-stone-950/95 z-20">
         <CaptureInput
           currentDate={`${currentMonth}-01`}
           onEntryCreated={loadMonthEntries}

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import type { Entry, TaskState, Signifier } from '../types/entry';
 import { db } from '../db';
 import { getBulletGlyph } from '../utils/parser';
-import { MoreHorizontal, ArrowRight, Edit3, Trash2, Star, Sparkles, Check } from 'lucide-react';
+import { MoreHorizontal, ArrowRight, Edit3, Trash2, Star, Sparkles, Check, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface EntryRowProps {
   entry: Entry;
@@ -10,6 +10,16 @@ interface EntryRowProps {
   onStateChange: (prev: Entry, actionDesc: string) => void;
   onEntryUpdated?: () => void;
   showDate?: boolean;
+  isDraggable?: boolean;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
+  isDragging?: boolean;
+  dropPosition?: 'top' | 'bottom' | null;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
 export function EntryRow({
@@ -18,6 +28,16 @@ export function EntryRow({
   onStateChange,
   onEntryUpdated,
   showDate = false,
+  isDraggable = false,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+  isDragging = false,
+  dropPosition = null,
+  onMoveUp,
+  onMoveDown,
 }: EntryRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(entry.text);
@@ -70,9 +90,21 @@ export function EntryRow({
     onEntryUpdated?.();
   };
 
-  // Keyboard shortcut listener on entry container
+    // Keyboard shortcut listener on entry container
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (isEditing) return;
+
+    if (e.altKey) {
+      if (e.key === 'ArrowUp' && onMoveUp) {
+        e.preventDefault();
+        onMoveUp();
+        return;
+      } else if (e.key === 'ArrowDown' && onMoveDown) {
+        e.preventDefault();
+        onMoveDown();
+        return;
+      }
+    }
 
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'Enter') {
@@ -131,10 +163,44 @@ export function EntryRow({
       onKeyDown={handleKeyDown}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={`group relative flex items-baseline gap-2.5 py-1.5 px-2 rounded-lg transition-colors outline-none focus-visible:ring-1 focus-visible:ring-stone-400 dark:focus-visible:ring-stone-600 hover:bg-stone-100/70 dark:hover:bg-stone-900/60 ${
+      draggable={isDraggable && !isEditing}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className={`group relative flex items-baseline gap-1.5 sm:gap-2 py-1.5 px-2 rounded-lg transition-all outline-none focus-visible:ring-1 focus-visible:ring-stone-400 dark:focus-visible:ring-stone-600 hover:bg-stone-100/70 dark:hover:bg-stone-900/60 ${
         entry.state === 'struck' ? 'opacity-60' : ''
+      } ${
+        isDragging
+          ? 'opacity-30 scale-[0.99] border-dashed border-2 border-stone-400 dark:border-stone-600 bg-stone-100/50 dark:bg-stone-800/40 shadow-inner'
+          : ''
       }`}
     >
+      {/* Drop Target Indicator Lines */}
+      {dropPosition === 'top' && (
+        <div
+          aria-hidden="true"
+          className="absolute -top-1 left-1.5 right-1.5 h-0.5 bg-stone-900 dark:bg-stone-100 rounded-full z-20 pointer-events-none shadow-sm"
+        />
+      )}
+      {dropPosition === 'bottom' && (
+        <div
+          aria-hidden="true"
+          className="absolute -bottom-1 left-1.5 right-1.5 h-0.5 bg-stone-900 dark:bg-stone-100 rounded-full z-20 pointer-events-none shadow-sm"
+        />
+      )}
+
+      {/* Drag & Drop Grip Handle */}
+      {isDraggable && (
+        <div
+          className="shrink-0 flex items-center justify-center w-3 sm:w-3.5 h-6 text-stone-300 dark:text-stone-700 hover:text-stone-600 dark:hover:text-stone-300 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity select-none"
+          title="Drag to reorder (or press Alt+Up / Alt+Down)"
+        >
+          <GripVertical className="w-3.5 h-3.5" />
+        </div>
+      )}
+
       {/* Interactive Bullet Symbol - Min 44px tap target on mobile */}
       <div className="shrink-0 flex items-center justify-center min-w-[28px] min-h-[30px]">
         <button
@@ -284,6 +350,30 @@ export function EntryRow({
                   className="w-full px-3 py-1.5 text-left text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center gap-2"
                 >
                   Strike out (Ctrl+Bksp)
+                </button>
+              )}
+              {onMoveUp && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onMoveUp();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 py-1.5 text-left text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center gap-2"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" /> Move up (Alt+Up)
+                </button>
+              )}
+              {onMoveDown && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onMoveDown();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 py-1.5 text-left text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center gap-2"
+                >
+                  <ArrowDown className="w-3.5 h-3.5" /> Move down (Alt+Down)
                 </button>
               )}
               <div className="border-t border-stone-200 dark:border-stone-800 my-1" />

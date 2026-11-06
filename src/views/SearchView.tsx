@@ -135,7 +135,7 @@ export function SearchView({ onStateChange, onNavigateToDate }: SearchViewProps)
       </header>
 
       {/* Results List */}
-      <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-1 dot-grid pb-20">
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-1 dot-grid pb-32 sm:pb-20">
         {filteredEntries.length === 0 ? (
           <div className="text-center py-16 text-stone-400 text-xs space-y-2">
             <p>No entries match your search &amp; filter criteria.</p>

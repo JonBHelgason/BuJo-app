@@ -72,6 +72,7 @@ export function CaptureInput({
       logDate: selectedDate,
       target: isInbox ? 'inbox' : undefined,
       collection: activeCollectionId && activeCollectionId !== 'inbox' ? activeCollectionId : isInbox ? 'inbox' : null,
+      order: Date.now(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };

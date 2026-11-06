@@ -68,7 +68,7 @@ export function FutureLog({ onStateChange, onNavigateToMonth }: FutureLogProps) 
   };
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto pb-20">
+    <div className="flex flex-col h-full overflow-y-auto pb-32 sm:pb-20">
       <header className="px-4 py-3 sm:px-6 border-b border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-900/40 sticky top-0 z-10 backdrop-blur-md">
         <div className="flex items-center justify-between">
           <div>

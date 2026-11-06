@@ -164,7 +164,7 @@ export function CollectionsView({ onStateChange }: CollectionsViewProps) {
           </div>
 
           {/* Entries in Collection */}
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-1 pb-24">
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-1 pb-36 sm:pb-24">
             {entries.length === 0 ? (
               <div className="max-w-sm mx-auto text-center py-12 text-stone-400 text-xs space-y-2">
                 <p>No entries in this collection yet.</p>
@@ -186,8 +186,8 @@ export function CollectionsView({ onStateChange }: CollectionsViewProps) {
             )}
           </div>
 
-          {/* Sticky Fast Capture for this Collection */}
-          <div className="p-3 sm:p-4 bg-gradient-to-t from-stone-50 via-stone-50/95 to-transparent dark:from-stone-950 dark:via-stone-950/95 z-20">
+          {/* Sticky Fast Capture for this Collection - Clear mobile bottom bar */}
+          <div className="sticky bottom-16 md:bottom-0 p-3 sm:p-4 bg-gradient-to-t from-stone-50 via-stone-50/95 to-transparent dark:from-stone-950 dark:via-stone-950/95 z-20">
             <CaptureInput
               currentDate={new Date().toISOString().slice(0, 10)}
               activeCollectionId={activeCollectionId}

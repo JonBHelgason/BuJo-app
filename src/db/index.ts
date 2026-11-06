@@ -16,7 +16,7 @@ export class BuJonDatabase extends Dexie {
     // type: for quick filtering
     // createdAt: for chronological ordering
     this.version(1).stores({
-      entries: 'id, logDate, target, collection, state, type, createdAt',
+      entries: 'id, logDate, target, collection, state, type, order, createdAt',
       collections: 'id, order, createdAt',
     });
   }

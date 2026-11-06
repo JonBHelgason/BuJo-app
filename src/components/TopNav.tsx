@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ViewMode } from '../types/entry';
-import { Sun, Moon, RotateCcw, CheckSquare } from 'lucide-react';
+import { Sun, Moon, RotateCcw, CheckSquare, Download } from 'lucide-react';
 
 interface TopNavProps {
   currentView: ViewMode;
@@ -11,6 +11,11 @@ interface TopNavProps {
   onOpenTestModal: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  isInstallable?: boolean;
+  isInstalled?: boolean;
+  isIOS?: boolean;
+  onInstall?: () => void;
+  onShowIOSGuide?: () => void;
 }
 
 export function TopNav({
@@ -22,6 +27,11 @@ export function TopNav({
   onOpenTestModal,
   isDarkMode,
   onToggleDarkMode,
+  isInstallable = false,
+  isInstalled = false,
+  isIOS = false,
+  onInstall,
+  onShowIOSGuide,
 }: TopNavProps) {
   const navItems: { id: ViewMode; label: string }[] = [
     { id: 'today', label: 'Today' },
@@ -42,15 +52,15 @@ export function TopNav({
         BuJón
       </button>
 
-      {/* Zone 2: 4-5 concise single-line text navigation links */}
-      <nav className="flex items-center gap-1 sm:gap-6 overflow-x-auto text-xs sm:text-sm font-medium text-stone-600 dark:text-stone-300">
+      {/* Zone 2: 4-5 concise single-line text navigation links (Hidden on mobile phones, powered by bottom tab bar) */}
+      <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-stone-600 dark:text-stone-300">
         {navItems.map((item) => {
           const isActive = currentView === item.id;
           return (
             <button
               key={item.id}
               onClick={() => onSelectView(item.id)}
-              className={`px-2 py-1 sm:px-0 sm:py-0 rounded-md transition-colors whitespace-nowrap shrink-0 relative ${
+              className={`rounded-md transition-colors whitespace-nowrap shrink-0 relative ${
                 isActive
                   ? 'text-stone-950 dark:text-white font-semibold'
                   : 'hover:text-stone-900 dark:hover:text-stone-100'
@@ -58,7 +68,7 @@ export function TopNav({
             >
               <span>{item.label}</span>
               {isActive && (
-                <span className="hidden sm:block absolute -bottom-3.5 left-0 right-0 h-0.5 bg-stone-900 dark:bg-stone-100 rounded-full" />
+                <span className="absolute -bottom-3.5 left-0 right-0 h-0.5 bg-stone-900 dark:bg-stone-100 rounded-full" />
               )}
             </button>
           );
@@ -66,7 +76,30 @@ export function TopNav({
       </nav>
 
       {/* Zone 3: 1 primary action area */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* PWA Install Trigger Button */}
+        {isInstallable && onInstall && !isInstalled && (
+          <button
+            onClick={onInstall}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors"
+            title="Install BuJón to Home Screen"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Install</span>
+          </button>
+        )}
+
+        {isIOS && !isInstalled && onShowIOSGuide && (
+          <button
+            onClick={onShowIOSGuide}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 transition-colors"
+            title="Install instructions for iOS Safari"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Install App</span>
+          </button>
+        )}
+
         {canUndo && (
           <button
             onClick={onUndo}
@@ -88,7 +121,7 @@ export function TopNav({
 
         <button
           onClick={onOpenTestModal}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-stone-900 dark:bg-stone-100 dark:text-stone-900 rounded-lg hover:bg-stone-800 dark:hover:bg-white transition-colors whitespace-nowrap shadow-xs"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-white bg-stone-900 dark:bg-stone-100 dark:text-stone-900 rounded-lg hover:bg-stone-800 dark:hover:bg-white transition-colors whitespace-nowrap shadow-xs"
           title="Open BuJón Testing Suite & Guide"
         >
           <CheckSquare className="w-3.5 h-3.5" />

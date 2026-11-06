@@ -16,6 +16,7 @@ export interface Entry {
   target?: TargetType; // Empty/undefined defaults to logDate
   origin?: string; // id of the parent entry if migrated
   collection?: string | null; // collectionId or null
+  order?: number; // Manual sorting order within day/collection
   createdAt: number; // Unix timestamp for stable sorting
   updatedAt: number;
 }
